@@ -1,5 +1,7 @@
 /// <reference types="cypress" />
 
+import { stubString } from "cypress/types/lodash"
+
 
 describe('Our first suite', () => {
 
@@ -58,7 +60,7 @@ describe('Our first suite', () => {
         cy.contains('nb-card', 'Horizontal form').find('[type="email"]')
     })
 
-    it.only('third test then and wrap',  () => {
+    it('third test then and wrap',  () => {
         cy.visit('/')
         cy.contains('Forms').click()
         cy.contains('Form Layouts').click()
@@ -84,16 +86,63 @@ describe('Our first suite', () => {
         // basicForm.contains('nb-card', 'Basic form').find('[for="exampleInputPassword1"]').should('contain', 'Password')
 
         cy.contains('nb-card', 'Using the Grid').then(firstForm => {
+            //available for following within tests
             const emailLabelFirst = firstForm.find('[for="inputEmail1"]').text()
             const passwordLabelFirst = firstForm.find('[for="inputPassword2"]').text()
-
+            // jquery does not allow cypress methods
+            // check the text labels in assertion. then means jquery no longer cypress
             expect(emailLabelFirst).to.equal('Email')
             expect(passwordLabelFirst).to.equal('Password')
 
+            cy.contains('nb-card', 'Basic form').then(secondForm => {
+                const emailLabelSecond = secondForm.find('[for="exampleInputEmail1"]').text()
+                expect(emailLabelSecond.substring(0, 5)).to.equal(emailLabelFirst)
+                // wrap back to cypress
+                cy.wrap(secondForm).find('[for="exampleInputPassword1"]').should('contain', 'Password')
+            })
+            
         })
 
     })
 
+    it('invoke command', () => {
+        cy.visit('/')
+        cy.contains('Forms').click()
+        cy.contains('Form Layouts').click()
+        //1
+        cy.get('[for="exampleInputEmail1"]').should('contain', 'Email address')
     
+        //2
+        cy.get('[for="exampleInputEmail1"]').then(label => {
+            expect(label.text()).to.equal('Email address')
+        })
+
+        //3 grabs text and invokes text method
+        cy.get('[for="exampleInputEmail1"]').invoke('text').then(text => {
+            expect(text).to.equal('Email address')
+        })
+
+
+        // next two are two different methods to check for a clicked checkbox
+        //cy.contains('nb-card', 'Basic form').find('nb-checkbox').click().find('.custom-checkbox').invoke('attr', 'class').should('contain', 'checked')
+         
+        cy.contains('nb-card', 'Basic form').find('nb-checkbox').click().find('.custom-checkbox')
+        .invoke('attr', 'class').then(classValue => {expect(classValue).to.contain('checked')
+    })
+
+    
+    })
+
+    it.only('assert property', () => {
+        cy.visit('/')
+        cy.contains('Forms').click()
+        cy.contains('Datepicker').click()
+
+        cy.contains('nb-card', 'Common Datepicker').find('input').then(input => {
+            cy.wrap(input).click()
+            cy.get('nb-calendar-day-picker').contains('17').click()
+            cy.wrap(input).invoke('prop', 'value').should('contain', 'Jun 17, 2022')
+        })
+    })
 
 })
