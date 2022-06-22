@@ -133,15 +133,35 @@ describe('Our first suite', () => {
     
     })
 
-    it('assert property', () => {
+    it.only('assert property', () => {
+        function selectDayFromCurrent(day=1) {
+            let date: Date = new Date();
+            date.setDate(date.getDate() + day)
+            let futureDay = date.getDate()
+            let futureMonth = date.toLocaleString('default', {month: 'short'})
+            let dateAssert = futureMonth + ' ' + futureDay + ', ' + date.getFullYear()
+
+            cy.get('nb-calendar-navigation').invoke('attr', 'ng-reflect-date').then(dateAttribute => {
+                if(!dateAttribute.includes(futureMonth)) {
+                    cy.get('[data-name="chevron-right"]').click()
+                    selectDayFromCurrent(day)
+                    //cy.get('nb-calendar-day-picker [class="day-cell ng-star-inserted"]').contains(futureDay).click()
+                } else {
+                    cy.get('nb-calendar-day-picker [class="day-cell ng-star-inserted"]').contains(futureDay).click()
+                }
+            })
+            return dateAssert
+        }
+
         cy.visit('/')
         cy.contains('Forms').click()
         cy.contains('Datepicker').click()
 
         cy.contains('nb-card', 'Common Datepicker').find('input').then(input => {
             cy.wrap(input).click()
-            cy.get('nb-calendar-day-picker').contains('17').click()
-            cy.wrap(input).invoke('prop', 'value').should('contain', 'Jun 17, 2022')
+            let dateAssert = selectDayFromCurrent(300) 
+            //cy.get('nb-calendar-day-picker').contains('17').click()
+            cy.wrap(input).invoke('prop', 'value').should('contain', dateAssert)
         })
     })
 
@@ -176,7 +196,6 @@ describe('Our first suite', () => {
 
     })
 
-
     it('lists and dropdowns', () => {
         cy.visit('/')
         // 1
@@ -209,7 +228,6 @@ describe('Our first suite', () => {
         // 3 select method
         // requires a select element
     })
-
 
     // tables!!!
     it('web tables', () => {
@@ -257,6 +275,9 @@ describe('Our first suite', () => {
 
 
     })
+
+    // datepicker
+
 
 
 
