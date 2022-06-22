@@ -133,7 +133,7 @@ describe('Our first suite', () => {
     
     })
 
-    it.only('assert property', () => {
+    it('assert property', () => {
         function selectDayFromCurrent(day=1) {
             let date: Date = new Date();
             date.setDate(date.getDate() + day)
@@ -276,7 +276,39 @@ describe('Our first suite', () => {
 
     })
 
-    // datepicker
+    // tooltip
+    it('tooltip', () => {
+        cy.visit('/')
+        cy.contains('Modal & Overlays').click()
+        cy.contains('Tooltip').click()
+
+        cy.contains('nb-card', 'Colored Tooltips').contains('Default').click()
+        cy.get('nb-tooltip').should('contain', 'This is a tooltip')
+    })
+
+    // dialog
+    it.only('dialog box', () => {
+        cy.visit('/')
+        cy.contains('Tables & Data').click()
+        cy.contains('Smart Table').click()
+
+        cy.get('tbody tr').first().find('.nb-trash').click()
+
+        //1 can fail but still succeed
+        cy.on('window:confirm', (confirm) => {
+            expect(confirm).to.eq('Are you sure you want to delete?')
+        })
+
+        // 2
+        const stub = cy.stub()
+        cy.on('window:confirm', stub) 
+        cy.get('tbody tr').first().find('.nb-trash').click().then(()=> {
+            expect(stub.getCall(0)).to.be.calledWith('Are you sure you want to delete?')
+        })
+
+
+
+    })
 
 
 
